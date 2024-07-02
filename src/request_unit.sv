@@ -1,10 +1,10 @@
 
 module request_unit
 (
-    input logic CLK, nRST, i_ready, d_ready, 
+    input logic CLK, nRST, i_ready_i, d_ready, 
     input logic  [5:0] cuOP, 
     input logic [31:0] dmmstorei, dmmaddri, imemaddri, imemloadi, dmmloadi,
-    output logic dmmWen, dmmRen, imemRen, 
+    output logic dmmWen, dmmRen, imemRen, i_ready_o,
     output logic [31:0] dmmstoreo, dmmaddro, imemaddro, imemloado, dmmloado
 );
 typedef enum logic [5:0] {
@@ -28,7 +28,7 @@ always_ff@(posedge CLK, negedge !nRST) begin
     end
 end
 always_comb begin
-    if (i_ready) begin
+    if (i_ready_i) begin
         if(cuOP == CU_LB| cuOP == CU_LH| cuOP == CU_LW | cuOP == CU_LBU | cuOP == CU_LHU) begin
         nxt_dmmRen = 1; 
         nxt_dmmWen = 0;
@@ -55,4 +55,5 @@ assign dmmaddro = dmmaddri;
 assign dmmstoreo = dmmstorei;
 assign imemloado = imemloadi;
 assign dmmloado = dmmloadi;
+assign i_ready_o = i_ready_i;
 endmodule
