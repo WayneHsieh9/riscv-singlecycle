@@ -22,6 +22,8 @@ module top1 (
 	output logic [5:0] cuOP,
 	output logic [19:0] imm,
 	output logic [31:0] memload, aluIn, aluOut, immOut, pc, writeData, regData1, regData2, instruction_out,
+  output logic [7:0] data,
+  output logic [8:0] addr
   // output logic [31:0][31:0] test_memory ,
   // output logic [31:0][31:0] test_nxt_memory 
 );
@@ -30,8 +32,6 @@ logic [31:0] instruction;
 mux aluMux(.in1(immOut), .in2(regData2), .en(aluSrc), .out(aluIn));
 
 alu arith(.aluOP(aluOP), .inputA(regData1), .inputB(aluIn), .ALUResult(aluOut), .zero(zero), .negative(negative));
-
-//request ru(.clk(clk), .nRST(nrst), .imemload(), .imemaddr(), .dmmaddr(), .dmmstore(), .ramaddr(), .ramload(), .ramstore(), .cuOP(), .Ren(), .Wen());
 
 register_file DUT(.clk(clk), .nRST(nrst), .reg_write(regWrite), .read_index1(regsel1), .read_index2(regsel2), 
 .read_data1(regData1), .read_data2(regData2), .write_index(w_reg), .write_data(writeData));
@@ -46,6 +46,7 @@ writeToReg write(.cuOP(cuOP), .memload(memload), .aluOut(aluOut), .imm(immOut), 
 
 signExtender signex(.imm(imm), .immOut(immOut), .CUOp(cuOP));
 
-ram ra(.clk(clk), .nRst(nrst), .write_enable(memWrite), .read_enable(1), .address_DM(aluOut[5:0]), .address_IM(pc[5:0]), .data_in(regData2), .data_out(memload), .instr_out(instruction), .pc_enable(i_ready), .CUOp(cuOP));
+request ru(.clk(clk), .nRST(nrst), .imemload(instruction), .imemaddr(pc[5:0]), .dmmaddr(aluOut[5:0]), .dmmstore(regData2), .ramaddr(addr), .ramload(), .ramstore(), .cuOP(), .Ren(), .Wen());
+//ram ra(.clk(clk), .nRst(nrst), .write_enable(memWrite), .read_enable(1), .address_DM(aluOut[5:0]), .address_IM(pc[5:0]), .data_in(regData2), .data_out(memload), .instr_out(instruction), .pc_enable(i_ready), .CUOp(cuOP));
 assign instruction_out = instruction;
 endmodule
