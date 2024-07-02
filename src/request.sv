@@ -3,7 +3,7 @@ module request (
     input logic CLK, nRST, busy_o,
     input logic [31:0] imemaddr, dmmaddr, dmmstore, ramload,
     input logic [5:0] cuOP,
-    output logic Ren, Wen, i_ready,
+    output logic Ren, Wen, i_ready,d_ready,
     output logic [31:0] imemload, dmmload, ramaddr, ramstore
 );
 typedef enum logic [5:0] {
@@ -14,19 +14,19 @@ typedef enum logic [5:0] {
 		CU_ADD, CU_SUB, CU_SLL, CU_SLT, CU_SLTU, CU_XOR, CU_SRL, CU_SRA, CU_OR, CU_AND,
 		CU_ERROR
 	} cuOPType;	
-logic i_ready_i, d_ready, dmmRen, dmmWen, imemRen;
+logic i_ready_i, d_ready_i, dmmRen, dmmWen, imemRen;
 logic [31:0] imemaddr_co, dmmaddr_co, dmmstore_co, dmmload_co, imemload_co;
 
 request_unit r1 (.CLK(CLK), .nRST(nRST), .dmmstorei(dmmstore), .dmmaddri(dmmaddr), .imemaddri(imemaddr), .cuOP(cuOP), 
-.i_ready_i(i_ready_i), .d_ready(d_ready), .dmmRen(dmmRen), .dmmWen(dmmWen), .imemRen(imemRen), .i_ready_o(i_ready),
+.i_ready_i(i_ready_i), .d_ready(d_ready_i), .dmmRen(dmmRen), .dmmWen(dmmWen), .imemRen(imemRen), .i_ready_o(i_ready),
  .imemaddro(imemaddr_co), .dmmstoreo(dmmstore_co), .dmmaddro(dmmaddr_co),
  .dmmloadi(dmmload_co), .imemloadi(imemload_co),
- .imemloado(imemload), .dmmloado(dmmload));
+ .imemloado(imemload), .dmmloado(dmmload), .d_ready_o(d_ready));
 
 memory_control m1 (.CLK(CLK), .nRST(nRST),
                     .dmmRen(dmmRen), .dmmWen(dmmWen), .imemRen(imemRen), .busy_o(busy_o),
                     .imemaddr(imemaddr_co), .dmmaddr(dmmaddr_co), .dmmstore(dmmstore_co),
-                    .ramload(ramload), .i_ready(i_ready_i), .d_ready(d_ready), .Ren(Ren), .Wen(Wen),
+                    .ramload(ramload), .i_ready(i_ready_i), .d_ready(d_ready_i), .Ren(Ren), .Wen(Wen),
                     .ramaddr(ramaddr), .ramstore(ramstore), .dmmload(dmmload_co), .imemload(imemload_co));
                     
 
