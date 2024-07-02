@@ -21,7 +21,8 @@ if (CUOp == CU_JAL)
     immOut = {{13{imm[19]}}, imm[7:0], imm[8], imm[18:9]};
 //All branch operations
 else if (CUOp == CU_BEQ || CUOp == CU_BNE || CUOp == CU_BLT || CUOp == CU_BGE || CUOp == CU_BLTU || CUOp == CU_BGEU)
-    immOut = {{20{imm[11]}}, imm[11], imm[9:4], imm[3:0], imm[10]};
+    //immOut = {{20{imm[11]}}, imm[11], imm[9:4], imm[3:0], imm[10]}
+	immOut = {{21{imm[11]}}, imm[0], imm[10:5], imm[4:1]};
 //other operations that are signed
 else if (CUOp == CU_ADDI || CUOp == CU_SUB || CUOp == CU_ADD || CUOp == CU_SLTI || CUOp == CU_SLT)
     immOut = {{20{imm[11]}}, imm[11:0]};

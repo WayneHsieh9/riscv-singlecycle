@@ -40,13 +40,13 @@ typedef enum logic [5:0] {
             if (iready)
                 case(cuOP)
                     CU_JALR: next_pc = rs1Read + signExtend;
-                    CU_JAL: next_pc = PC + (signExtend >> 1);
-                    CU_BEQ: next_pc = (Zero? PC + (signExtend>>1): PC + 4);
-                    CU_BNE: next_pc = (~Zero? PC + (signExtend >> 1) : PC + 4);
-                    CU_BLT: next_pc = (ALUneg? PC + (signExtend >> 1): PC + 4);
-                    CU_BGE: next_pc = (~ALUneg | Zero? PC + (signExtend >> 1) : PC + 4);
-                    CU_BLTU: next_pc = (ALUneg? PC + (signExtend >> 1): PC + 4);
-                    CU_BGEU: next_pc = (~ALUneg | Zero? PC + (signExtend >> 1) : PC + 4);
+                    CU_JAL: next_pc = PC + (signExtend << 1);
+                    CU_BEQ: next_pc = (Zero? PC + (signExtend << 1): PC + 4);
+                    CU_BNE: next_pc = (~Zero? PC + (signExtend << 1) : PC + 4);
+                    CU_BLT: next_pc = (ALUneg? PC + (signExtend << 1): PC + 4);
+                    CU_BGE: next_pc = (~ALUneg | Zero? PC + (signExtend << 1) : PC + 4);
+                    CU_BLTU: next_pc = (ALUneg? PC + (signExtend << 1): PC + 4);
+                    CU_BGEU: next_pc = (~ALUneg | Zero? PC + (signExtend << 1) : PC + 4);
                     default: next_pc = PC + 4;
                 endcase
                 else
