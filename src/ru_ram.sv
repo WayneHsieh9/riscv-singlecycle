@@ -6,8 +6,8 @@ module ru_ram (
     output logic busy
 );
 
-reg [31:0] memory [63:0];
-reg [31:0] nxt_memory [63:0];
+reg [31:0] memory [255:0];
+reg [31:0] nxt_memory [255:0];
 
 typedef enum logic {IDLE, WAIT} StateType;
 StateType state, next_state;
@@ -17,7 +17,7 @@ always_ff @(posedge clk, negedge nRst) begin
         $readmemh("fill.mem", memory);
         state <= IDLE;
     end else begin
-        for (int i = 0;i<64 ;i++ ) begin
+        for (int i = 0;i<256 ;i++ ) begin
             memory[i] <= nxt_memory[i];
         end
         state <= next_state;
@@ -26,7 +26,7 @@ end
 
 always_comb begin
     next_state = state;
-    for (int i = 0;i<64 ;i++ ) begin
+    for (int i = 0;i<256 ;i++ ) begin
         nxt_memory[i] = memory[i];
     end
 
