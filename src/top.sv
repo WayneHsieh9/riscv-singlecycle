@@ -4,10 +4,10 @@
 
 module top (
   // I/O ports
-  // input  logic hz100, reset,
-  // input  logic [20:0] pb,
+  input  logic hz100, reset,
+  input  logic [20:0] pb,
   // output logic [7:0] left, right,
-  //        ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0,
+          ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0,
   // output logic red, green, blue,
 
   // // UART ports
@@ -24,6 +24,12 @@ module top (
 	output logic [19:0] imm,
 	output logic [31:0] memload, aluIn, aluOut, immOut, pc, writeData, regData1, regData2
 );
+
+logic muxxedMemEnable;
+
+FPGAModuleCalc a1 (.memEnable(right[0]), .dataOut(dataOut), .displayCPU(1), .inputFromRam(1), .addressOut(addressOut), .hz100(hz100), .pb(pb), .reset(~reset), .ss7(ss7), .ss6(ss6), .ss4(ss4), .ss3(ss3), .ss1(ss1), .ss0(ss0));
+
+
 
 mux aluMux(.in1(immOut), .in2(regData2), .en(aluSrc), .out(aluIn));
 
