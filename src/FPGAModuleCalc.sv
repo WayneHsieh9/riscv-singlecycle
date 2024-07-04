@@ -21,7 +21,6 @@ module FPGAModuleCalc (
 
     stateLog currentState, nextState;
 
-  
 
     logic keyStrobe;
 
