@@ -33,14 +33,16 @@ logic muxxedMemEnable, fpgaMemEnable;
 logic[31:0] muxxedDataOut, fpgaAddressOut, fpgaDataOut;
 logic [31:0] muxxedAddressOut, addressOut;
 logic [31:0]intermedWriteEnable;
-mux enableFpgaOut(.in1(32'd1), .in2({31'b0, write_enable_cpu}), .en(fpgaMemEnable), .out(intermedWriteEnable));
-assign write_enable = intermedWriteEnable[0];
-mux enableFpgaData(.in1(fpgaDataOut), .in2(datain), .en(fpgaMemEnable), .out(muxxedDataOut));
-mux enableFpgaAddress(.in1(fpgaAddressOut), .in2(addr), .en(fpgaMemEnable), .out(muxxedAddressOut));
+// mux enableFpgaOut(.in1(32'd1), .in2({31'b0, write_enable_cpu}), .en(fpgaMemEnable), .out(intermedWriteEnable));
+// assign write_enable = intermedWriteEnable[0];
+// mux enableFpgaData(.in1(fpgaDataOut), .in2(datain), .en(fpgaMemEnable), .out(muxxedDataOut));
+// mux enableFpgaAddress(.in1(fpgaAddressOut), .in2(addr), .en(fpgaMemEnable), .out(muxxedAddressOut));
 
 logic displayCPU;
-FPGAModuleCalc a1 (.memEnable(fpgaMemEnable), .dataOut(fpgaDataOut), .displayCPU(displayCPU), .inputFromRam(1), .addressOut(fpgaAddressOut), .hz100(clk), .pb(pb), .reset(nrst), .ss7(ss7), .ss6(ss6), .ss4(ss4), .ss3(ss3), .ss1(ss1), .ss0(ss0));
-////////////////////FPGA connection
+FPGAModuleCalc a1 (.memEnable(fpgaMemEnable), .dataOut(fpgaDataOut), .displayCPU(displayCPU), .inputFromRam(1), .addressOut(fpgaAddressOut), .hz100(clk), .pb(pb), .reset(~nrst), .ss7(ss7), .ss6(ss6), .ss4(ss4), .ss3(ss3), .ss1(ss1), .ss0(ss0));
+////////////////////
+
+
 
 logic [31:0] instruction;
 logic [7:0] data_out8;
@@ -67,4 +69,6 @@ request ru(.CLK(clk), .nRST(nrst), .imemload(instruction), .imemaddr(pc), .dmmad
 ru_ram rram (.clk(clk), .nRst(nrst), .write_enable(|write_enable), .addr(muxxedAddressOut), .data_in(muxxedDataOut), .data_out(dataout), .busy(busy_o));
 //ram ra(.clk(clk), .nRst(nrst), .write_enable(memWrite), .read_enable(1), .address_DM(aluOut[5:0]), .address_IM(pc[5:0]), .data_in(regData2), .data_out(memload), .instr_out(instruction), .pc_enable(i_ready), .CUOp(cuOP));
 assign instruction_out = instruction;
+
+
 endmodule

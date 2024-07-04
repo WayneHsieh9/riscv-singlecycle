@@ -9,7 +9,7 @@
 module FPGAModuleCalc (
   // I/O ports
   input logic displayCPU, //check for this condition to display equal output
-  input logic inputFromRam,
+  input logic inputFromRam, //data to be displayed from RAM
   input  logic hz100, reset,
   input  logic [20:0] pb,
   output logic [7:0] ss7, ss6, ss4, ss3, ss1, ss0,
