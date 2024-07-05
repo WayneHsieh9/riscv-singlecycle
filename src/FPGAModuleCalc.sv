@@ -9,18 +9,53 @@
 module FPGAModuleCalc (
   // I/O ports
   input logic displayCPU, //check for this condition to display equal output
-  input logic inputFromRam, //data to be displayed from RAM
   input  logic hz100, reset,
   input  logic [20:0] pb,
-  output logic [7:0] ss7, ss6, ss4, ss3, ss1, ss0,
+  output logic [7:0] ss7, ss6, ss5, ss4, ss3, ss2,ss1, ss0,
+  input logic [31:0] regVal, //data coming from CPU to be displayed when FPGAModule is in its final state
 
   output logic[31:0] addressOut,   //will be the address that will be written to for the data
+  output logic [31:0]fpgaReadDataAddress,
   output logic[31:0]dataOut,
-  output logic memEnable
+  output logic memEnable,
+  output logic cpuEnable,
+  output logic fpgaReadEnable
 );
 
     stateLog currentState, nextState;
 
+    logic nextCpuEnable;
+/*
+    logic enableCounter;
+    integer clkCount, nextClkCount;
+
+    assign enableCounter = cpuEnable;
+
+    always_ff@(posedge hz100, negedge reset, posedge pb[12])
+        if (~reset | pb[12]) begin
+            clkCount <= 0;
+            cpuEnable <= nextCpuEnable;
+        end
+        else begin
+            clkCount <= nextClkCount;
+            cpuEnable <= nextCpuEnable;
+        end
+
+    always_comb begin
+        if (clkCount == 200) begin
+            cpuEnable = 0;
+        end
+        else if (cpuEnable) begin
+            nextClkCount = clkCount + 1;
+            cpuEnable = 1;
+        end
+        else begin
+            nextClkCount = clkCount;
+            cpuEnable = 0;
+        end
+    end
+
+    */
 
     logic keyStrobe;
 
@@ -36,13 +71,20 @@ module FPGAModuleCalc (
 
     /*temporary test code for ss display*/
 
-    integer tens1, ones1;
+    integer tens1, ones1, thousandsAnswer, hundredsAnswer, tensAnswer, onesAnswer;
     integer tens2, ones2;
-    logic [3:0]hundredsLog1, tensLog1, onesLog1;
-    logic [3:0]hundredsLog2, tensLog2, onesLog2;
+    logic [3:0]tensLog1, onesLog1, thousandsLogAnswer, hundredsLogAnswer, tensLogAnswer, onesLogAnswer;
+    logic [3:0]tensLog2, onesLog2;
     integer temp1;
     integer temp2;
+    integer temp3;
     logic [15:0] operationDis, nextOperationDis;
+
+    logic [6:0] ss4Data, ss3Data;
+    logic [3:0] ss5Data, ss2Data;
+
+    logic finalEnable; //enable for ssdec for when in final state
+    logic displayEnable; //enable for when the user is inputting numbers, operations
 
    always_comb begin
 
@@ -62,23 +104,79 @@ module FPGAModuleCalc (
         tensLog2 = tens2[3:0];
         onesLog2 = ones2[3:0];
 
-    end
+        temp3 = regVal; //can go up to 9801//////////////////////////////////////
+
+        thousandsAnswer = temp3 / 1000;
+        temp3 = temp3 % 1000;
+
+        hundredsAnswer = temp3 / 100;
+        temp3 = temp3 % 100;
+
+        tensAnswer = temp3 / 10;
+        onesAnswer = temp3 % 10;
+
+        thousandsLogAnswer = thousandsAnswer[3:0];
+        hundredsLogAnswer = hundredsAnswer[3:0];
+        tensLogAnswer = tensAnswer[3:0];
+        onesLogAnswer = onesAnswer[3:0];
+
+        if (currentState == FINAL) begin
+            if (pb[3]) begin
+                fpgaReadDataAddress = 32'd5;
+                fpgaReadEnable = 1;
+            end
+            else if (pb[4]) begin
+                fpgaReadDataAddress = 32'd8;
+                fpgaReadEnable = 1;
+            end
+            else begin
+                fpgaReadDataAddress = 32'd300;
+                fpgaReadEnable = 0;
+            end
+            ss5Data = thousandsLogAnswer;
+            ss4 = {1'b0, ss4Data};
+            ss3 = {1'b0, ss3Data};
+            ss2Data = onesLogAnswer;
+            finalEnable = 1'b1;
+            displayEnable = 1'b0;
+        end
+        else begin
+            fpgaReadDataAddress = 32'd300;
+            fpgaReadEnable = 0;
+            ss5Data = 0;
+            ss4 = operationDis[15:8];
+            ss3 = operationDis[7:0];
+            ss2Data = 0;
+            finalEnable = 1'b0;
+            displayEnable = 1'b1;
+        end
 
 
+   end
 
-    ssdec f2 (.in(onesLog1), .enable(1'b1), .out(ss6[6:0]));
-    ssdec f3 (.in(tensLog1), .enable(1'b1), .out(ss7[6:0]));
-    ssdec f4 (.in(onesLog2), .enable(1'b1), .out(ss0[6:0]));
-    ssdec f5 (.in(tensLog2), .enable(1'b1), .out(ss1[6:0]));
+    //    ssdec f2 (.in(onesLog1), .enable(1'b1), .out(ss6[6:0])); //old
+    // ssdec f3 (.in(tensLog1), .enable(1'b1), .out(ss7[6:0])); //old
+    // ssdec f4 (.in(onesLog2), .enable(1'b1), .out(ss0[6:0])); //old
+    // ssdec f5 (.in(tensLog2), .enable(1'b1), .out(ss1[6:0])); //old
 
-    assign {ss4, ss3} = operationDis;
+    // assign {ss4, ss3} = operationDis; //old
 
-    
+    //always running in background
+    ssdec ss4DataDec(.in(hundredsLogAnswer), .enable(1), .out(ss4Data));
+    ssdec ss3DataDec(.in(tensLogAnswer), .enable(1), .out(ss3Data));
+    //////
+    ssdec f2 (.in(onesLog1), .enable(displayEnable), .out(ss6[6:0]));
+    ssdec f3 (.in(tensLog1), .enable(displayEnable), .out(ss7[6:0]));
+    ssdec f4 (.in(onesLog2), .enable(displayEnable), .out(ss0[6:0]));
+    ssdec f5 (.in(tensLog2), .enable(displayEnable), .out(ss1[6:0]));
+
+    //thousands place and ones place
+    ssdec f6 (.in(ss5Data), .enable(finalEnable), .out(ss5[6:0]));
+    ssdec f7 (.in(ss2Data), .enable(finalEnable), .out(ss2[6:0]));
 
 //for when we receive the "Equal" output from the CPU, we need an additional comb block for determining what will be displayed on the ss displays
 
     ////////////////////////////////
-
     always_ff@(posedge keyStrobe, negedge reset)
         if (~reset) begin
             currentState <= NUM1;
@@ -88,6 +186,7 @@ module FPGAModuleCalc (
             operationDis <= 16'b0;
             r1Count <= 0;
             r2Count <= 0;
+            cpuEnable <= 0;
         end
         else begin
             currentState <= nextState;
@@ -97,9 +196,10 @@ module FPGAModuleCalc (
             operationDis <= nextOperationDis;
             r1Count <= r1NextCount;
             r2Count <= r2NextCount;
+            cpuEnable <= nextCpuEnable;
         end
 
-    decoder f7 (.pbIn(pb[19:0]), .decOut(decOut));
+    decoder f10 (.pbIn(pb[19:0]), .decOut(decOut));
 
     //li t6, 0x140  # load the immediate 0x140 (address) into register t6
     //sw t0, 0(t6)  # store the word in t0 to memory address in t6 with 0 byte offset   
@@ -128,9 +228,10 @@ module FPGAModuleCalc (
                 nextR2Val = 0; 
                 nextOperation = 0;
                 nextOperationDis = 0;
-                addressOut = 0;
+                addressOut = 32'd244; //dump address for memory will not be used, did this bc of inferred latch
                 dataOut = 0;
                 memEnable = 0;
+                nextCpuEnable = 0;
 
             end
 
@@ -162,10 +263,12 @@ module FPGAModuleCalc (
                     nextOperationDis = 16'b00111111_00111111;
                 end
 
-                addressOut = 32'd20000;
+                addressOut = 32'd220;
                 dataOut = r1Val;
                 memEnable = 1;
+                nextCpuEnable = 0;
             end
+            
             
 
             {NUM2, 1'b1, 1'b0, 1'b0, 1'b0}: begin //inputting numbers right now, will stay at state num2
@@ -182,10 +285,10 @@ module FPGAModuleCalc (
                 nextOperation = operation;
                 nextOperationDis = operationDis;
 
-                addressOut = 32'd20200;
+                addressOut = 32'd228;
                 dataOut = {28'b0, operation};
                 memEnable = 1;
-                
+                nextCpuEnable = 0;
 
             end
             
@@ -198,9 +301,11 @@ module FPGAModuleCalc (
             nextOperationDis = operationDis;
             r1NextCount = r1Count;
             r2NextCount = r2Count;
-            addressOut = 32'd20400;
+            addressOut = 32'd224;
             dataOut = r2Val;
             memEnable = 1;
+            nextCpuEnable = 1;
+
 
            end
 
@@ -213,9 +318,12 @@ module FPGAModuleCalc (
             nextOperationDis = operationDis;
             r1NextCount = r1Count;
             r2NextCount = r2Count;
-            addressOut = 32'd30000;
+            addressOut = 32'd244;
             dataOut = 0;
             memEnable = 0;
+            nextCpuEnable = cpuEnable;
+
+
            end
 
             {3'b???, 1'b0, 1'b0, 1'b0, 1'b1}: begin //from any state if the clear is pressed
@@ -227,9 +335,10 @@ module FPGAModuleCalc (
             nextOperationDis = 0;
             r1NextCount = 0;
             r2NextCount = 0;
-            addressOut = 32'd30000; //dump address
+            addressOut = 32'd244; //dump address
             dataOut = 0;
             memEnable = 0;
+            nextCpuEnable = 0;
            end
 
            default: begin
@@ -240,9 +349,10 @@ module FPGAModuleCalc (
                 nextOperationDis = operationDis;
                 r1NextCount = r1Count;
                 r2NextCount = r2Count;
-                addressOut = 32'd30000; //dump address
+                addressOut = 32'd244; //dump address
                 dataOut = 0;
                 memEnable = 0;
+                nextCpuEnable = 0;
            end
 
         endcase

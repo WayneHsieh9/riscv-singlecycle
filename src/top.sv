@@ -17,7 +17,7 @@ module top (
   input  logic txready, rxready
 );
 
-top1 f1 (.clk(hz100), .nrst(reset), .pb(pb), .ss7(ss7), .ss6(ss6), .ss4(ss4), .ss3(ss3), .ss1(ss1), .ss0(ss0));
+top1 f1 (.clk(hz100), .nrst(reset), .pb(pb), .ss7(ss7), .ss6(ss6), .ss5(ss5), .ss4(ss4), .ss3(ss3), .ss2(ss2), .ss1(ss1), .ss0(ss0));
 
 // ///////////////////////FPGA connection
 // logic muxxedMemEnable, fpgaMemEnable;

@@ -7,7 +7,7 @@ module top1 (
   input  logic clk, nrst,
   input  logic [20:0] pb,
   // output logic [7:0] left, right,
-  output logic [7:0] ss7, ss6, ss4, ss3, ss1, ss0
+  output logic [7:0] ss7, ss6, ss5, ss4, ss3, ss2, ss1, ss0
   // output logic red, green, blue,
 
   // // UART ports
@@ -27,22 +27,30 @@ module top1 (
   logic [31:0] addr;
   logic [31:0][31:0] test_memory;
   logic [31:0][31:0] test_nxt_memory; 
+  logic cpuEnable;
 
-///////////////////////FPGA connection
-logic muxxedMemEnable, fpgaMemEnable;
-logic[31:0] muxxedDataOut, fpgaAddressOut, fpgaDataOut;
-logic [31:0] muxxedAddressOut, addressOut;
-logic [31:0]intermedWriteEnable;
-// mux enableFpgaOut(.in1(32'd1), .in2({31'b0, write_enable_cpu}), .en(fpgaMemEnable), .out(intermedWriteEnable));
-// assign write_enable = intermedWriteEnable[0];
-// mux enableFpgaData(.in1(fpgaDataOut), .in2(datain), .en(fpgaMemEnable), .out(muxxedDataOut));
-// mux enableFpgaAddress(.in1(fpgaAddressOut), .in2(addr), .en(fpgaMemEnable), .out(muxxedAddressOut));
+// ///////////////////////FPGA connection
+logic [31:0]muxxedMemWriteEnable, muxxedReadEnable;
+logic fpgaMemEnable, fpgaReadEnable;
+
+logic[31:0] muxxedDataOut, fpgaAddressOut, fpgaDataOut, fpgaReadDataAddress;
+logic [31:0] muxxedAddressOut, addressOut, muxxedReadAddressData;
+
+mux writeEnableMux(.in1(32'b1), .in2({31'b0, memWrite}), .en(fpgaMemEnable), .out(muxxedMemWriteEnable));
+
+mux writeFpgaData(.in1(fpgaDataOut), .in2(regData2), .en(fpgaMemEnable), .out(muxxedDataOut));
+
+mux writeFpgaAddress(.in1(fpgaAddressOut), .in2(aluOut), .en(fpgaMemEnable), .out(muxxedAddressOut));
+
+mux fpgaReadEnableModule(.in1(32'b1), .in2({31'b0, memRead}), .en(fpgaReadEnable), .out(muxxedReadEnable));
+
+mux readFpgaAddressData(.in1(fpgaReadDataAddress), .in2(muxxedAddressOut), .en(fpgaReadEnable), .out(muxxedReadAddressData)); //once the final state inside the FPGA module is reached, it will output a dedicated address to RAM, which will output a value
 
 logic displayCPU;
-FPGAModuleCalc a1 (.memEnable(fpgaMemEnable), .dataOut(fpgaDataOut), .displayCPU(displayCPU), .inputFromRam(1), .addressOut(fpgaAddressOut), .hz100(clk), .pb(pb), .reset(~nrst), .ss7(ss7), .ss6(ss6), .ss4(ss4), .ss3(ss3), .ss1(ss1), .ss0(ss0));
-////////////////////
+FPGAModuleCalc a1 (.fpgaReadEnable(fpgaReadEnable), .regVal(memload), .memEnable(fpgaMemEnable), .dataOut(fpgaDataOut), .displayCPU(displayCPU), 
+.addressOut(fpgaAddressOut), .fpgaReadDataAddress(fpgaReadDataAddress), .hz100(clk), .pb(pb), .reset(~nrst), .ss7(ss7), .ss6(ss6), .ss5(ss5), .ss4(ss4), .ss3(ss3), .ss2(ss2), .ss1(ss1), .ss0(ss0), .cpuEnable(cpuEnable));
 
-
+// ////////////////////
 
 logic [31:0] instruction;
 logic [7:0] data_out8;
@@ -63,12 +71,13 @@ writeToReg write(.cuOP(cuOP), .memload(memload), .aluOut(aluOut), .imm(immOut), 
 
 signExtender signex(.imm(imm), .immOut(immOut), .CUOp(cuOP));
 
-request ru(.CLK(clk), .nRST(nrst), .imemload(instruction), .imemaddr(pc), .dmmaddr(aluOut), .dmmstore(regData2), .ramaddr(addr), .ramload(dataout), .ramstore(datain), 
-.cuOP(cuOP), .Wen(write_enable_cpu), .busy_o(busy_o), .dmmload(memload), .i_ready(i_ready), .d_ready(d_ready), .Ren());
+//request ru(.CLK(clk), .nRST(nrst), .imemload(instruction), .imemaddr(pc), .dmmaddr(aluOut), .dmmstore(regData2), .ramaddr(addr), .ramload(dataout), .ramstore(datain), 
+// .cuOP(cuOP), .Wen(write_enable_cpu), .busy_o(busy_o), .dmmload(memload), .i_ready(i_ready), .d_ready(d_ready), .Ren());
 
-ru_ram rram (.clk(clk), .nRst(nrst), .write_enable(|write_enable), .addr(muxxedAddressOut), .data_in(muxxedDataOut), .data_out(dataout), .busy(busy_o));
-//ram ra(.clk(clk), .nRst(nrst), .write_enable(memWrite), .read_enable(1), .address_DM(aluOut[5:0]), .address_IM(pc[5:0]), .data_in(regData2), .data_out(memload), .instr_out(instruction), .pc_enable(i_ready), .CUOp(cuOP));
+logic [31:0]fpgaOut;
+
+// ram rram (.clk(clk), .nRst(nrst), .write_enable(|write_enable), .addr(muxxedAddressOut[11:0]), .data_in(muxxedDataOut), .data_out(dataout), .busy(busy_o), .fpgaOut(fpgaOut));
+ram ra(.clk(clk), .nRst(nrst), .write_enable(muxxedMemWriteEnable[0]), .read_enable(muxxedReadEnable[0]), .address_DM(muxxedReadAddressData[11:0]), .address_IM(pc[11:0]), .data_in(muxxedDataOut), .data_out(memload), .instr_out(instruction), .pc_enable(i_ready));
 assign instruction_out = instruction;
-
-
+ 
 endmodule
