@@ -1,12 +1,12 @@
-// `include "src/top1.sv"
-// `include "src/alu.sv"
-// `include "src/control.sv"
-// `include "src/mux.sv" 
-// `include "src/pc.sv" 
-// `include "src/ram.sv" 
-// `include "src/register_file.sv" 
-// `include "src/signExtender.sv" 
-// `include "src/writeToReg.sv" 
+`include "src/top1.sv"
+`include "src/alu.sv"
+`include "src/control.sv"
+`include "src/mux.sv" 
+`include "src/pc.sv" 
+`include "src/ram.sv" 
+`include "src/register_file.sv" 
+`include "src/signExtender.sv" 
+`include "src/writeToReg.sv" 
 
 
 
@@ -80,7 +80,7 @@ nrst = 1'b1;
 // @(posedge clk);
 // @(negedge clk);
 // @(posedge clk);
-#1000;
+#5000;
 $finish;
 end
 

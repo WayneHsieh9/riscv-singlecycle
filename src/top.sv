@@ -18,9 +18,11 @@ module top (
 
 );
 // assign right [0] = 1'b1;
-logic [31:0] dummyVar;
-ru_ram test (.clk(hz100), .nRst(!pb[19]), .addr(32'b0), .data_in(32'b0), .data_out(dummyVar), .busy(right[0]), .write_enable(1'b1));
-
-
-
+logic [31:0] display;
+top1 top (.clk(hz100), .nrst(!pb[19]), .display(display));
+assign ss7 = display [31:24];
+assign ss6 = display [23:16];
+assign ss5 = display [15:8];
+assign ss4 = display [7:0];
+assign right [0] = pb[9];
 endmodule
