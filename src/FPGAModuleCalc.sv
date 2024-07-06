@@ -86,6 +86,37 @@ module FPGAModuleCalc (
     logic finalEnable; //enable for ssdec for when in final state
     logic displayEnable; //enable for when the user is inputting numbers, operations
 
+    logic [31:0] nextMemoryLocationCount;
+
+    always_comb begin
+        if (!reset)
+            fpgaReadDataAddress = 32'd460;
+        else if (currentState == FINAL) begin
+            if(pb[2])
+                fpgaReadDataAddress  = 32'd220;
+            else if (pb[1])
+                fpgaReadDataAddress  = 32'd300;
+            else if (pb[0])
+                fpgaReadDataAddress  = 32'd260;
+            else if (pb[4])
+                fpgaReadDataAddress = 32'd460;
+            else
+                fpgaReadDataAddress = 32'd460;
+        end
+            else
+                fpgaReadDataAddress = 32'd460;
+        
+    end
+
+/*
+    always_comb begin
+        if (currentState == FINAL)
+            nextMemoryLocationCount = fpgaReadDataAddress + 1;
+        else
+            nextMemoryLocationCount = fpgaReadDataAddress;
+    end
+    */
+
    always_comb begin
 
         temp1 = r1Val;
@@ -122,15 +153,9 @@ module FPGAModuleCalc (
 
         if (currentState == FINAL) begin
             if (pb[3]) begin
-                fpgaReadDataAddress = 32'd5;
-                fpgaReadEnable = 1;
-            end
-            else if (pb[4]) begin
-                fpgaReadDataAddress = 32'd8;
                 fpgaReadEnable = 1;
             end
             else begin
-                fpgaReadDataAddress = 32'd300;
                 fpgaReadEnable = 0;
             end
             ss5Data = thousandsLogAnswer;
@@ -141,7 +166,6 @@ module FPGAModuleCalc (
             displayEnable = 1'b0;
         end
         else begin
-            fpgaReadDataAddress = 32'd300;
             fpgaReadEnable = 0;
             ss5Data = 0;
             ss4 = operationDis[15:8];
@@ -228,7 +252,7 @@ module FPGAModuleCalc (
                 nextR2Val = 0; 
                 nextOperation = 0;
                 nextOperationDis = 0;
-                addressOut = 32'd244; //dump address for memory will not be used, did this bc of inferred latch
+                addressOut = 32'd100; //dump address for memory will not be used, did this bc of inferred latch
                 dataOut = 0;
                 memEnable = 0;
                 nextCpuEnable = 0;
@@ -285,7 +309,7 @@ module FPGAModuleCalc (
                 nextOperation = operation;
                 nextOperationDis = operationDis;
 
-                addressOut = 32'd228;
+                addressOut = 32'd300;
                 dataOut = {28'b0, operation};
                 memEnable = 1;
                 nextCpuEnable = 0;
@@ -301,7 +325,7 @@ module FPGAModuleCalc (
             nextOperationDis = operationDis;
             r1NextCount = r1Count;
             r2NextCount = r2Count;
-            addressOut = 32'd224;
+            addressOut = 32'd260;
             dataOut = r2Val;
             memEnable = 1;
             nextCpuEnable = 1;
@@ -318,7 +342,7 @@ module FPGAModuleCalc (
             nextOperationDis = operationDis;
             r1NextCount = r1Count;
             r2NextCount = r2Count;
-            addressOut = 32'd244;
+            addressOut = 32'd100;
             dataOut = 0;
             memEnable = 0;
             nextCpuEnable = cpuEnable;
@@ -335,7 +359,7 @@ module FPGAModuleCalc (
             nextOperationDis = 0;
             r1NextCount = 0;
             r2NextCount = 0;
-            addressOut = 32'd244; //dump address
+            addressOut = 32'd100; //dump address
             dataOut = 0;
             memEnable = 0;
             nextCpuEnable = 0;
@@ -349,7 +373,7 @@ module FPGAModuleCalc (
                 nextOperationDis = operationDis;
                 r1NextCount = r1Count;
                 r2NextCount = r2Count;
-                addressOut = 32'd244; //dump address
+                addressOut = 32'd100; //dump address
                 dataOut = 0;
                 memEnable = 0;
                 nextCpuEnable = 0;

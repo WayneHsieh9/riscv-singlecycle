@@ -30,7 +30,7 @@ typedef enum logic [5:0] {
 
 
             always_ff@(posedge clk, negedge nRST)
-                if (nRST == 0)
+                if (!nRST)
                     PC <= INITPC;
                 else
                     PC <= next_pc;
