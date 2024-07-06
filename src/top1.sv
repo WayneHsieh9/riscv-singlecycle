@@ -16,7 +16,7 @@ module top1 (
   // output logic txclk, rxclk,
   // input  logic txready, rxready
 	input logic clk, nrst,
-	output logic zero, negative, regWrite, aluSrc, d_ready, i_ready, memWrite, memRead, Wen,busy_o, Ren,
+	output logic zero, negative, regWrite, aluSrc, d_ready, i_ready, memWrite, memRead, Wen,busy_o, Ren, write_enable,
 	output logic [3:0] aluOP,
 	output logic [4:0] regsel1, regsel2, w_reg,
 	output logic [5:0] cuOP,
@@ -44,10 +44,11 @@ writeToReg write(.cuOP(cuOP), .memload(memload), .aluOut(aluOut), .imm(immOut), 
 signExtender signex(.imm(imm), .immOut(immOut), .CUOp(cuOP));
 
  request ru(.CLK(clk), .nRST(nrst), .imemload(instruction), .imemaddr(pc), .dmmaddr(aluOut), .dmmstore(regData2), .ramaddr(ramaddr), .ramload(ramload), .ramstore(ramstore), 
-.cuOP(cuOP), .Wen(Wen), .busy_o(busy_o), .dmmload(memload), .Ren(Ren));
+.cuOP(cuOP), .Wen(Wen), .busy_o(busy_o), .dmmload(memload), .i_ready(i_ready), .d_ready(d_ready),.Ren());
 
 
-ru_ram rram (.clk(clk), .nRst(nrst), .write_enable(write_enable), .addr(addr), .data_in(datain), .data_out(dataout), .busy(busy_o));
+
+ru_ram rram (.clk(clk), .nRst(nrst), .write_enable(Wen), .addr(ramaddr), .data_in(ramstore), .data_out(ramload), .busy(busy_o));
 
 //ram ra(.clk(clk), .nRst(nrst), .write_enable(memWrite), .read_enable(1), .address_DM(aluOut[5:0]), .address_IM(pc[5:0]), .data_in(regData2), .data_out(memload), .instr_out(instruction), .pc_enable(i_ready), .display(display));
 
