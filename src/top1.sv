@@ -47,10 +47,10 @@ mux readFpgaAddressData(.in1(fpgaReadDataAddress), .in2(muxxedAddressOut), .en(f
 mux fpgaReadEnableModule(.in1(32'b1), .in2({31'b0, memRead}), .en(fpgaReadEnable), .out(muxxedReadEnable));
 
 logic [31:0]muxxedCpuEnable;
-mux cpuEnableMuxed(.in1(32'b1), .in2(32'b0), .en(cpuEnable), .out(muxxedCpuEnable)); //make i_ready to 0 instead? bc i_ready is 1 anyway.
+mux cpuEnableMuxed(.in1(32'b1), .in2(32'b0), .en(cpuEnable), .out(muxxedCpuEnable)); //make i_ready to 0 instead? bc i_ready is 1 anyway most of the time (works for sub at least)
 
 logic displayCPU;
-FPGAModuleCalc a1 (.fpgaReadEnable(fpgaReadEnable), .regVal(memload), .memEnable(fpgaMemEnable), .dataOut(fpgaDataOut), .displayCPU(displayCPU), 
+FPGAModuleCalc a1 (.fpgaReadEnable(fpgaReadEnable), .regVal(memload), .memEnable(fpgaMemEnable), .dataOut(fpgaDataOut), 
 .addressOut(fpgaAddressOut), .fpgaReadDataAddress(fpgaReadDataAddress), .hz100(clk), .pb(pb), .reset(nrst), .ss7(ss7), .ss6(ss6), .ss5(ss5), .ss4(ss4), .ss3(ss3), .ss2(ss2), .ss1(ss1), .ss0(ss0), .cpuEnable(cpuEnable));
 
 // ////////////////////
