@@ -13,7 +13,7 @@ logic delay;
  assign keyout[0] = keyin[19] | keyin[17] | keyin[15] | keyin[13] | keyin[11] | keyin[9] | keyin[7] | keyin[5] | keyin[3] | keyin[1];
 
 always_ff @(posedge clk or negedge rst) begin
- if(~rst) begin
+ if(!rst) begin
     delay <= 0;
     keyclk <= 0;
  end else begin

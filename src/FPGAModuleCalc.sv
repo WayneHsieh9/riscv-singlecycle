@@ -90,7 +90,7 @@ module FPGAModuleCalc (
 
     always_comb begin
         if (!reset)
-            fpgaReadDataAddress = 32'd460;
+            fpgaReadDataAddress = 32'd0;
         else if (currentState == FINAL) begin
             if(pb[2])
                 fpgaReadDataAddress  = 32'd220;
@@ -101,10 +101,10 @@ module FPGAModuleCalc (
             else if (pb[4])
                 fpgaReadDataAddress = 32'd460;
             else
-                fpgaReadDataAddress = 32'd460;
+                fpgaReadDataAddress = 32'd0;
         end
             else
-                fpgaReadDataAddress = 32'd460;
+                fpgaReadDataAddress = 32'd0;
         
     end
 
@@ -201,8 +201,8 @@ module FPGAModuleCalc (
 //for when we receive the "Equal" output from the CPU, we need an additional comb block for determining what will be displayed on the ss displays
 
     ////////////////////////////////
-    always_ff@(posedge keyStrobe, negedge reset)
-        if (~reset) begin
+    always_ff@(posedge keyStrobe or negedge reset)
+        if (!reset) begin
             currentState <= NUM1;
             r1Val <= 0;
             r2Val <= 0;
