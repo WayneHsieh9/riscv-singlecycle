@@ -47,7 +47,8 @@ signExtender signex(.imm(imm), .immOut(immOut), .CUOp(cuOP));
 .cuOP(cuOP), .Wen(Wen), .busy_o(busy_o), .dmmload(memload), .i_ready(i_ready), .d_ready(d_ready),.Ren());
 
 
-ru_ram rram (.clk(clk), .nRst(nrst), .write_enable(Wen), .addr(ramaddr), .data_in(ramstore), .data_out(ramload), .busy(busy_o));
+ru_ram rram (.clk(clk), .write_en(Wen), .addr(ramaddr[11:0]>>2), .din(ramstore), .dout(ramload));
+assign busy_o = 0;
 
 //ram ra(.clk(clk), .nRst(nrst), .write_enable(memWrite), .read_enable(1), .address_DM(aluOut[11:0]), .address_IM(pc[11:0]), .data_in(regData2), .data_out(memload), .instr_out(instruction), .pc_enable(i_ready));
 
