@@ -1,5 +1,5 @@
 // module ru_ram (
-//     input logic clk, nRst, write_enable, 
+//     input logic clk, nRst,write_en, 
 //     input logic [31:0] addr,
 //     input logic [31:0] data_in,
 //     output logic [31:0] data_out,
@@ -38,7 +38,7 @@
 //             busy = 0;
 //             // next_state = WAIT;
 //             next_state = IDLE;
-//             if (write_enable) begin
+//             if write_en) begin
 //                 nxt_memory[addr>>2] = data_in;
 //             end 
 //         end
@@ -57,26 +57,28 @@
 
 
 
-module ru_ram (
-    input logic clk, nRst, write_enable, 
-    input logic [31:0] addr,
+module ram (
+    input logic clk, nRst,write_en, 
+    input logic [11:0] addr,
     input logic [31:0] data_in,
     output logic [31:0] data_out,
     output logic busy
 );
 
-logic [31:0] memory [47:0];
+logic [31:0] memory [4095:0];
 logic [31:0] nxt_memory;
-// logic [31:0] cur_memory;
 
-// assign cur_memory = memory[addr>>2];
 
 typedef enum logic {IDLE, WAIT} StateType;
 StateType state, next_state;
 
+
+initial begin
+$readmemh("fill.mem", memory);
+end
+
 always_ff @(posedge clk, negedge nRst) begin
     if (!nRst) begin
-        $readmemh("fill.mem", memory);
         state <= IDLE;
     end else begin
         memory[addr>>2] <= nxt_memory;
@@ -93,9 +95,9 @@ always_comb begin
     case (state)
         IDLE : begin
             busy = 0;
-            // next_state = WAIT;
+            next_state = WAIT;
             next_state = IDLE;
-            if (write_enable) begin
+            if (write_en) begin
                 nxt_memory = data_in;
             end 
         end
@@ -106,6 +108,8 @@ always_comb begin
         end
     endcase  
 end
+
+
 
 assign data_out = memory[addr>>2];
 

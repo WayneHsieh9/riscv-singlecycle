@@ -13,7 +13,7 @@ TOP_FILE		:= top1.sv
 
 # Specify the name of component or sub-module files
 # (do not include the source folder in the name)
-COMPONENT_FILES	:= memory_control.sv mux.sv pc.sv register_file.sv request_unit.sv request.sv ru_ram.sv signExtender.sv writeToReg.sv control.sv alu.sv ssdec.sv 
+COMPONENT_FILES	:= memory_control.sv mux.sv pc.sv register_file.sv request_unit.sv request.sv ram.sv signExtender.sv writeToReg.sv control.sv alu.sv ssdec.sv 
 
 
 # Specify the top level testbench to be simulated
