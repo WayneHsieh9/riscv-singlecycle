@@ -133,14 +133,14 @@
 
 module ram (
 input logic clk, nRst, write_enable, read_enable,
-input logic [5:0] address_DM, address_IM,
+input logic [11:0] address_DM, address_IM,
 input logic [31:0] data_in,
 output reg [31:0] data_out,
 output reg [31:0] instr_out,
 output logic pc_enable,
 output logic [31:0] display
 );
-logic [31:0] memory [63:0];
+logic [31:0] memory [4096:0];
  
 typedef enum logic {IDLE, WAIT} StateType;
 StateType state, next_state;
