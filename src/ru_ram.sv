@@ -62,12 +62,14 @@ module ru_ram (
     input logic [31:0] addr,
     input logic [31:0] data_in,
     output logic [31:0] data_out,
-    output logic busy,
-    output logic [31:0] display
+    output logic busy
 );
 
-logic [31:0] memory [31:0];
+logic [31:0] memory [47:0];
 logic [31:0] nxt_memory;
+// logic [31:0] cur_memory;
+
+// assign cur_memory = memory[addr>>2];
 
 typedef enum logic {IDLE, WAIT} StateType;
 StateType state, next_state;
@@ -84,7 +86,7 @@ end
 
 always_comb begin
     next_state = state;
-    nxt_memory = memory[addr>>2];
+    nxt_memory = data_out;
 
     busy = 0;
 
@@ -103,7 +105,6 @@ always_comb begin
             busy = 1;
         end
     endcase  
-    display = {memory [0]};
 end
 
 assign data_out = memory[addr>>2];
