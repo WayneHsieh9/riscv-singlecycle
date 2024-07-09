@@ -52,9 +52,9 @@ signExtender signex(.imm(imm), .immOut(immOut), .CUOp(cuOP));
  .cuOP(cuOP), .Wen(write_enable), .busy_o(busy_o), .dmmload(memload), .i_ready(i_ready), .d_ready(d_ready),.Ren());
 
 // ram rram (.clk(clk), .nRst(nrst), .write_en(write_enable), .addr(addr[11:0]), .data_in(datain), .data_out(dataout), .busy(busy_o));
-ram rram (.din(datain), .addr(addr[11:0]), .write_en(write_enable), .clk(clk), .dout(dataout));
+ru_ram rram (.clk(clk), .nRst(nrst), .addr(addr), .write_en(write_enable), .data_in(datain), .data_out(dataout), .busy(busy_o));
 //ram ra(.clk(clk), .nRst(nrst), .write_enable(memWrite), .read_enable(1), .address_DM(aluOut[11:0]), .address_IM(pc[11:0]), .data_in(regData2), .data_out(memload), .instr_out(instruction), .pc_enable(i_ready));
-assign display =instruction;
+assign display = regData2;
 assign instruction_out = instruction;
-assign busy_o = 0;
+
 endmodule
